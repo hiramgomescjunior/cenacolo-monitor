@@ -2,7 +2,12 @@ name: 🎨 Monitor Cenacolo Vinciano — 18/09/2026
 
 on:
   schedule:
-    - cron: '*/20 * * * *'
+    # A cada 10 minutos o dia todo
+    - cron: '*/10 * * * *'
+    # A cada 1 minuto entre 09h50–09h59 UTC (= 11h50–11h59 horário Itália)
+    - cron: '50-59 9 * * *'
+    # A cada 1 minuto entre 10h00–10h15 UTC (= 12h00–12h15 horário Itália)
+    - cron: '0-15 10 * * *'
   workflow_dispatch:
     inputs:
       test_mode:
