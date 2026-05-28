@@ -18,7 +18,7 @@ from email.mime.multipart import MIMEMultipart
 from playwright.async_api import async_playwright
 
 # ─────────────────────────────────────────────
-# CONFIGURAÇÃO
+# CONFIGURAÇÃ
 # ─────────────────────────────────────────────
 TARGET_DAY   = 18
 TARGET_MONTH = 9
