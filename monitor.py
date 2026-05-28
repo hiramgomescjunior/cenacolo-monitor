@@ -126,26 +126,42 @@ async def check_event(event: dict) -> list[str]:
             # ── 1. Navegar até Setembro 2026 ──
             month_keywords = ["settembre", "september", "setembro"]
             found_month = False
+            last_month_text = ""
 
-            for _ in range(30):
+            for attempt in range(30):
                 content = (await page.content()).lower()
+
                 if any(kw in content for kw in month_keywords) and "2026" in content:
                     found_month = True
                     log.info("Calendário em Setembro 2026 encontrado.")
                     break
 
+                # Detecta o mês atual para checar se o calendário parou de avançar
+                current_month_text = content[:2000]  # primeiros chars têm o mês
+                if attempt > 0 and current_month_text == last_month_text:
+                    log.info("Calendário chegou ao limite — Setembro 2026 ainda não disponível.")
+                    return []
+                last_month_text = current_month_text
+
+                # Verifica se o botão "próximo" está desabilitado
                 next_btn = page.locator(
                     "button[aria-label*='prossimo'], button[aria-label*='next'], "
                     "[class*='next']:not([disabled]), [class*='arrow-right'], "
                     "[class*='calendar-next'], button:has-text('›'), button:has-text('>')"
                 ).first
 
-                if await next_btn.count() > 0:
-                    await next_btn.click()
-                    await page.wait_for_timeout(1_200)
-                else:
-                    log.warning("Botão 'próximo mês' não encontrado.")
-                    break
+                if await next_btn.count() == 0:
+                    log.info("Botão 'próximo mês' não encontrado — calendário no limite.")
+                    return []
+
+                is_disabled = await next_btn.get_attribute("disabled")
+                btn_classes = (await next_btn.get_attribute("class") or "").lower()
+                if is_disabled is not None or "disabled" in btn_classes:
+                    log.info("Botão 'próximo mês' desabilitado — Setembro ainda não abriu.")
+                    return []
+
+                await next_btn.click()
+                await page.wait_for_timeout(1_200)
 
             if not found_month:
                 log.info(f"Setembro 2026 ainda não disponível: {event['name']}")
