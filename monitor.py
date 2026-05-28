@@ -25,6 +25,7 @@ TARGET_MONTH = 9
 TARGET_YEAR  = 2026
 MIN_HOUR     = 16
 MIN_MINUTE   = 30
+TEST_MODE = os.environ.get("TEST_MODE", "false").lower() == "true"
 
 # Gmail — use uma App Password (não sua senha normal)
 GMAIL_ADDRESS      = os.environ.get("GMAIL_ADDRESS", "")
@@ -312,7 +313,27 @@ async def main():
         else:
             log.info(f"❌ Sem disponibilidade: {event['name']}")
 
-    if not found_any:
+    if TEST_MODE:
+        log.info("🧪 MODO TESTE — enviando email simulado...")
+        send_email(
+            subject="🧪 TESTE — Monitor Cenacolo Vinciano funcionando!",
+            body_text=(
+                "Este é um email de teste do seu monitor de ingressos.\n\n"
+                "Quando ingressos reais estiverem disponíveis, você receberá "
+                "um email igual a este, mas com os horários e o link de compra.\n\n"
+                "✅ Configuração funcionando corretamente!"
+            ),
+            body_html="""
+            <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:20px">
+              <h2 style="color:#2e7d32">🧪 Email de teste — tudo funcionando!</h2>
+              <p>Este é um email de teste do seu monitor de ingressos do Cenacolo Vinciano.</p>
+              <p>Quando ingressos reais estiverem disponíveis para <strong>18/09/2026 a partir das 16h30</strong>,
+              você receberá um email igual a este, mas com os horários disponíveis e um botão direto para compra.</p>
+              <p style="color:#2e7d32;font-weight:bold">✅ Gmail, App Password e GitHub Actions: tudo configurado corretamente.</p>
+            </div>
+            """
+        )
+    elif not found_any:
         log.info("Nenhum ingresso encontrado. Próxima verificação em 20 minutos.")
 
     log.info("=== Verificação concluída ===")
